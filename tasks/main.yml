@@ -1,0 +1,57 @@
+---
+
+- name: Install network-manager packages
+  apt:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - network-manager
+    - network-manager-gnome
+  when: ansible_os_family == 'Debian'
+  tags:
+    - vpn
+    - openvpn
+
+- name: Create network-manager directories
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - /etc/NetworkManager
+    - /etc/NetworkManager/system-connections
+  tags:
+    - vpn
+    - openvpn
+
+- name: Install OpenVPN packages
+  apt:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - 'openvpn'
+    - 'network-manager-openvpn'
+    - 'network-manager-openvpn-gnome'
+    - 'resolvconf'
+  when: ansible_os_family == 'Debian'
+  tags:
+    - vpn
+    - openvpn
+
+- name: Create OpenVPN password connections
+  template:
+    src: vpn-password.j2
+    dest: "/etc/NetworkManager/system-connections/{{item.id}}"
+    owner: root
+    group: root
+    mode: 0600
+  vars:
+    connection: "{{item}}"
+  with_items: "{{vpn_password_connections}}"
+  notify:
+    - Restart network-manager
+  tags:
+    - vpn
+    - openvpn
