@@ -12,6 +12,4 @@ galaxy_info:
   galaxy_tags:
     - openvpn
     - vpn
-    - vpn-client
-    - network-manager
 dependencies: []
